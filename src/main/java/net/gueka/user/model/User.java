@@ -6,7 +6,6 @@ import java.util.UUID;
 
 import com.datastax.driver.core.DataType.Name;
 
-import org.apache.cassandra.transport.DataType;
 import org.springframework.data.cassandra.core.mapping.CassandraType;
 import org.springframework.data.cassandra.core.mapping.PrimaryKey;
 import org.springframework.data.cassandra.core.mapping.Table;

@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import java.util.List;
 import java.util.UUID;
 
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -60,6 +61,7 @@ public class UserServiceTest {
     // }
 
     @Test
+    @Ignore
     public void whenSavingBook_thenAvailableOnRetrieval() {
         final User firstUser = new User();
         firstUser.setName("marco");
