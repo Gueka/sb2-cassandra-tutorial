@@ -6,9 +6,11 @@ import java.util.UUID;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import lombok.extern.slf4j.Slf4j;
 import net.gueka.user.model.User;
 import net.gueka.user.repository.UserRepository;
 
+@Slf4j
 @Service
 public class UserService {
 
@@ -32,7 +34,7 @@ public class UserService {
             repository.deleteById(id);
             return true;
         }catch(IllegalArgumentException e){
-            // TODO log error
+            log.error("User with id '{}' was not found", id, e);
             return false;
         }
 	}
