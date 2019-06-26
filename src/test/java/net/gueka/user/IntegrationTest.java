@@ -26,7 +26,8 @@ import net.gueka.user.repository.UserRepository;
 @DataCassandraTest
 @EmbeddedCassandra(scripts = "/schema.cql", port = "0", rpcPort = "0", storagePort = "0", sslStoragePort = "0", jmxLocalPort = "0")
 public class IntegrationTest {
-    // https://github.com/nosan/cassandra-test-spring-boot
+    
+    // Credits for https://github.com/nosan/cassandra-test-spring-boot
 
     @Autowired
     UserRepository repository;
@@ -52,6 +53,7 @@ public class IntegrationTest {
 
 	@Test
 	public void findAll() {
+		long size = repository.count();
 		assertThat(this.session.execute("SELECT * FROM tutorial.users")).hasSize(1);
 	}
 	
