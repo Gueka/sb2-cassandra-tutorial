@@ -1,6 +1,7 @@
 package net.gueka.user;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -19,18 +20,24 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
+import org.springframework.boot.test.web.client.TestRestTemplate;
+import org.springframework.boot.web.server.LocalServerPort;
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.data.cassandra.core.CassandraAdminOperations;
 import org.springframework.data.cassandra.core.cql.CqlIdentifier;
-import org.springframework.test.context.ContextConfiguration;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
-import net.gueka.user.configuration.CassandraConfig;
 import net.gueka.user.model.Location;
 import net.gueka.user.model.User;
 import net.gueka.user.repository.UserRepository;
 
 @ExtendWith(SpringExtension.class)
-@ContextConfiguration(classes = CassandraConfig.class)
+@SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
 public class IntegrationTest {
 
     @Autowired
@@ -38,6 +45,11 @@ public class IntegrationTest {
 	
 	@Autowired
 	CassandraAdminOperations adminTemplate;
+
+	TestRestTemplate restTemplate = new TestRestTemplate();
+	
+	@LocalServerPort
+	Integer port;
 
 	private static final String KEYSPACE_CREATION_QUERY = "CREATE KEYSPACE tutorial WITH REPLICATION = { 'class' : 'SimpleStrategy', 'replication_factor' : 1 };";
 	private static final String KEYSPACE_ACTIVATE_QUERY = "USE tutorial;";
@@ -48,7 +60,7 @@ public class IntegrationTest {
     public static void startCassandraEmbedded() throws InterruptedException, TTransportException, ConfigurationException, IOException {
 		EmbeddedCassandraServerHelper.startEmbeddedCassandra();
 		final Cluster cluster = Cluster.builder()
-			.addContactPoints("127.0.0.1")
+			.addContactPoints("localhost")
 			.withPort(9142)
 			.withoutMetrics()
 			.build();
@@ -57,24 +69,37 @@ public class IntegrationTest {
 		session.execute(KEYSPACE_ACTIVATE_QUERY);
 		session.execute(LOCATION_TYPE_CREATION_QUERY);
 		
+	}
+	
+    
+    @Test
+    public void saveTest() throws Exception {
+       
+        HttpEntity<User> entity = new HttpEntity<User>(getRequest("test"));
+
+		ResponseEntity<User> response = restTemplate.exchange(
+				"http://localhost:" + port + "/user",
+				HttpMethod.POST, entity, new ParameterizedTypeReference<User>() {
+				});
+
+		assertTrue(response.getBody() != null, "Has to return at leas a message");
+        assertEquals("test", response.getBody().getName(), "Has to return test username");
+    }
+
+    private User getRequest(String name) {
+		return User.builder()
+			.id(UUID.randomUUID())
+			.name(name)
+			.location(Location.builder()
+				.city("Gotham")
+				.build())
+			.build();
     }
 
     @BeforeEach
     public void createTable() throws InterruptedException, TTransportException, ConfigurationException, IOException {
         adminTemplate.createTable(true, CqlIdentifier.of(DATA_TABLE_NAME, true), User.class, new HashMap<String, Object>());
     }
-
-    @Test
-    public void whenSavingBook_thenAvailableOnRetrieval() {
-		final User user = User.builder()
-			.id(UUID.randomUUID())
-			.name("asd")
-			.location(Location.builder().city("test").build())
-			.build();
-        repository.save(user);
-        final Iterable<User> users = repository.findAll();
-        assertEquals(user.getId(), users.iterator().next().getId());
-	}
 
 	@AfterEach
 	public void dropTable() {
