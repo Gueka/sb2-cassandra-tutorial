@@ -28,7 +28,7 @@ public class User {
 
     List<String> tags;
 
-    //@CassandraType(type = Name.UDT, userTypeName = "location") 
-    String location;
+    @CassandraType(type = Name.UDT, userTypeName = "LOCATION") 
+    Location location;
 
 }

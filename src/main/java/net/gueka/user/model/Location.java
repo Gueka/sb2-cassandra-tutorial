@@ -8,7 +8,7 @@ import lombok.Data;
 
 @Builder
 @Data
-@UserDefinedType("location")
+@UserDefinedType("LOCATION")
 public class Location {
     String city;
     @Column("zip_code")
