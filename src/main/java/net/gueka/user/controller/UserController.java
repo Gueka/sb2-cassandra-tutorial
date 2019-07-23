@@ -3,6 +3,8 @@ package net.gueka.user.controller;
 import java.util.List;
 import java.util.UUID;
 
+import javax.validation.Valid;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -10,9 +12,9 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestAttribute;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import net.gueka.user.model.User;
@@ -23,7 +25,7 @@ import net.gueka.user.service.UserService;
 public class UserController {
 
     @Autowired
-    UserService service ;
+    UserService service;
 
     @GetMapping(value = "/all")
     public List<User> getAllUsers(){
@@ -31,12 +33,12 @@ public class UserController {
     }
 
     @GetMapping
-    public User getUserById(@RequestBody UUID id) {
+    public User getUserById(@RequestParam @Valid UUID id) {
         return service.findById(id);
     }
 
     @PostMapping
-    public User add(@RequestBody User user) {
+    public User add(@RequestBody @Valid User user) {
         return service.save(user);
     }
 
@@ -51,7 +53,7 @@ public class UserController {
     }
 
     @DeleteMapping
-    public ResponseEntity<?> delete(@RequestAttribute("id") UUID id) {
+    public ResponseEntity<?> delete(@RequestParam @Valid UUID id) {
         if(service.remove(id)){
             return new ResponseEntity<>(null, HttpStatus.OK);
         }else{
