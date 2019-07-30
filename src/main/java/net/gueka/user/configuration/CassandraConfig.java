@@ -13,13 +13,13 @@ import org.springframework.data.cassandra.repository.config.EnableCassandraRepos
 @EnableCassandraRepositories(basePackages = "net.gueka.user.repository")
 public class CassandraConfig extends AbstractCassandraConfiguration {
 
-    @Value("${cassandra.keyspace:tutorial}")
+    @Value("${cassandra.keyspace}")
     public String keyspace;
 
     @Value("${cassandra.contactpoints}")
     private String contactPoints;
 
-    @Value("${cassandra.port:9042}")
+    @Value("${cassandra.port}")
     private Integer port;
 
     @Value("${cassandra.metrics.enabled:false}")
@@ -32,10 +32,9 @@ public class CassandraConfig extends AbstractCassandraConfiguration {
  
     @Bean
     public CassandraClusterFactoryBean cluster() {
-        CassandraClusterFactoryBean cluster = 
-          new CassandraClusterFactoryBean();
-        cluster.setContactPoints("127.0.0.1");
-        cluster.setPort(9142);
+        CassandraClusterFactoryBean cluster = new CassandraClusterFactoryBean();
+        cluster.setContactPoints(contactPoints);
+        cluster.setPort(port);
         cluster.setMetricsEnabled(metricsEnabled);
         return cluster;
     }

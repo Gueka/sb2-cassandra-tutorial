@@ -14,6 +14,8 @@ import com.datastax.driver.core.Session;
 
 import org.apache.cassandra.exceptions.ConfigurationException;
 import org.apache.thrift.transport.TTransportException;
+import org.cassandraunit.CQLDataLoader;
+import org.cassandraunit.dataset.cql.ClassPathCQLDataSet;
 import org.cassandraunit.utils.EmbeddedCassandraServerHelper;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
@@ -43,17 +45,19 @@ import net.gueka.user.repository.UserRepository;
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
 public class IntegrationTest {
 
-    @Autowired
-	UserRepository repository;
+	@LocalServerPort
+	Integer port;
 	
 	@Autowired
 	CassandraAdminOperations adminTemplate;
-
+	
+	@Autowired
+	UserRepository repository;
+	
 	TestRestTemplate restTemplate = new TestRestTemplate();
 	
-	@LocalServerPort
-	Integer port;
-
+	private static final Integer DB_PORT = 9142;
+	private static final String CONTACT_POINTS = "localhost";
 	private static final String KEYSPACE_CREATION_QUERY = "CREATE KEYSPACE tutorial WITH REPLICATION = { 'class' : 'SimpleStrategy', 'replication_factor' : 1 };";
 	private static final String KEYSPACE_ACTIVATE_QUERY = "USE tutorial;";
 	private static final String LOCATION_TYPE_CREATION_QUERY = "CREATE TYPE LOCATION (city TEXT, zip_code TEXT, address TEXT);";
@@ -63,15 +67,14 @@ public class IntegrationTest {
     public static void startCassandraEmbedded() throws InterruptedException, TTransportException, ConfigurationException, IOException {
 		EmbeddedCassandraServerHelper.startEmbeddedCassandra();
 		final Cluster cluster = Cluster.builder()
-			.addContactPoints("localhost")
-			.withPort(9142)
+			.addContactPoints(CONTACT_POINTS)
+			.withPort(DB_PORT)
 			.withoutMetrics()
 			.build();
 		final Session session = cluster.connect();
-        session.execute(KEYSPACE_CREATION_QUERY);
+		session.execute(KEYSPACE_CREATION_QUERY);
 		session.execute(KEYSPACE_ACTIVATE_QUERY);
 		session.execute(LOCATION_TYPE_CREATION_QUERY);
-		
 	}
 	
     
